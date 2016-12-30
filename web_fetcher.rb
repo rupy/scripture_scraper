@@ -91,10 +91,10 @@ class WebFetcher
 	end
 
 
-	def get_web_page_file_name(lang, title_id, book_id)
+	def get_web_page_file_name(lang, title_id, page_id)
 		title = TITLES[title_id]
 		web_page_dir = @config['structure']['web_page_dir']
-		file_name = sprintf("%s/%s/%s/%03d.html", web_page_dir, lang, title, book_id)
+		file_name = sprintf("%s/%s/%s/%03d.html", web_page_dir, lang, title, page_id)
 		file_name
 	end
 
@@ -141,18 +141,29 @@ class WebFetcher
 		end
 	end
 
-	def get_book_names(title_id)
+	def get_names(title_id)
 		target_urls = read_url_list title_id
-		book_names = target_urls.map{|url|url.split(/\//).last.split(/\./)[0]}
-		book_names
+		names = target_urls.map{|url|
+			split_url = url.split(/\//)
+
+			book_name = split_url[-2]
+			chaper_name = split_url.last.split(/\?/)[0]
+
+			[book_name, chaper_name]
+		}
+		names
 	end
 
-	def read_web_data(title_id, book_id)
-		file_name = get_web_page_file_name title_id, book_id
-		web_data = open(file_name, "r") do |f|
-			f.read
+	def read_web_data(lang, title_id, page_id)
+		file_name = get_web_page_file_name lang, title_id, page_id
+		if File.exist?(file_name)
+			web_data = open(file_name, "r") do |f|
+				f.read
+			end
+			web_data
+		else
+			nil
 		end
-		web_data
 	end
 
 end
