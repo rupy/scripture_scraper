@@ -3,10 +3,7 @@ require 'logger'
 class FootnoteReferenceProcessor < ParseBase
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
-
+		super
 	end
 
 	# 通常のreferenceと違うので別処理

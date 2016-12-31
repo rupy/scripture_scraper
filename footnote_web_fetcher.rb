@@ -7,10 +7,7 @@ require './web_fetcher'
 class FootnoteWebFetcher < WebFetcher
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
-
+		super
 		@config = YAML.load_file('config/config.yml')
 	end
 

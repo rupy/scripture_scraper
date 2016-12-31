@@ -4,9 +4,7 @@ require './parse_base'
 class StyleProcessor < ParseBase
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
+		super
 	end
 
 	def get_style_type(style_node)

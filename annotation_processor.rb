@@ -6,9 +6,7 @@ require './footnote_processor'
 
 class AnnotationProcessor < ParseBase
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
+		super
 	end
 
 	def process_annotations(verse_node)

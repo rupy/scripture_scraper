@@ -1,8 +1,14 @@
-
+require 'logger'
 
 class ParseBase
 
 	RETRY_TIME = 3
+
+	def initialize
+		# ロガーの初期化
+		@log = Logger.new(STDERR)
+		@log.level=Logger::DEBUG
+	end
 	
 	def try_and_retry
 		# 立て続けにたくさんのデータを取ってきていると、エラーを出すことがある。

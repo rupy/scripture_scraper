@@ -4,10 +4,7 @@ require './footnote_reference_processor'
 class FootnoteBox < ParseBase
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
-
+		super
 	end
 
 	def get_footnote(doc)

@@ -7,9 +7,7 @@ class RubyProcessor < ParseBase
 	ALLOWED_NODE_TYPE = ['text', 'b', 'span']
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
+		super
 	end
 
 	def remove_empty_ruby_nodes(ruby_node)

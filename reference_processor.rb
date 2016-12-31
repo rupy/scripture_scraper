@@ -7,9 +7,7 @@ class ReferenceProcessor < ParseBase
 	ALLOWED_NODE_TYPE = ['text', 'ruby']
 
 	def initialize
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
+		super
 	end
 
 	def check_if_not_cotains_tag(node)

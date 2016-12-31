@@ -14,14 +14,13 @@ class ScripturePage < ParseBase
 	VERSE_TYPE_CHAPTER_TITLE = "chapter_title"
 
 	def initialize(lang, title, book)
-		# ロガーの初期化
-		@log = Logger.new(STDERR)
-		@log.level=Logger::DEBUG
 
 		@lang = lang
 		@title = title
 		@book = book
 		@state = STATE_NORMAL
+
+		super()
 	end
 
 	def get_verse_name_and_remove_dont_highlight_anchor(verse_node)

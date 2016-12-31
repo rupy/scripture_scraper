@@ -8,12 +8,12 @@ class WebFetcher
 	RETRY_TIME = 3
 	TITLES = ["bom", 'd_c', 'pog', 'old', 'new']
 
-	def initialize(config)
+	def initialize
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
 
-		@config = config
+		@config = YAML.load_file('config/config.yml')
 
 	end
 

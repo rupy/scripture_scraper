@@ -15,7 +15,7 @@ class ScriptureScraper
 
 		@config = YAML.load_file('config/config.yml')
 
-		@web_fetcher = WebFetcher.new @config
+		@web_fetcher = WebFetcher.new
 
 	end
 
