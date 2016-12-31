@@ -2,3 +2,4 @@ structure:
     url_list_dir: url_lists
     web_page_dir: web_pages
     output_csv_dir: output
+    web_footnote_dir: web_footnotes

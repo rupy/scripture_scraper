@@ -80,6 +80,12 @@ class WebFetcher
 		end
 	end
 
+	def prepare_footnote_dir(lang = 'eng')
+		web_footnote_dir = @config['structure']['web_footnote_dir']
+		lang_dir_path = "#{web_footnote_dir}/#{lang}"
+		mkdir_unless_exist(lang_dir_path)
+	end
+
 	def store(file_name, web_data)
 		open(file_name, "wb") do |f|
 			f.write(web_data)
@@ -108,6 +114,7 @@ class WebFetcher
 		@log.info("start fetch web pages")
 
 		prepare_dir lang
+		prepare_footnote_dir lang # 後のために作っておく
 
 		TITLES.each_with_index do |title, title_id|
 
@@ -143,11 +150,16 @@ class WebFetcher
 
 	def get_names(title_id)
 		target_urls = read_url_list title_id
-		names = target_urls.map{|url|
+		names = target_urls.map{ |url|
 			split_url = url.split(/\//)
 
-			book_name = split_url[-2]
-			chaper_name = split_url.last.split(/\?/)[0]
+			# 英語の聖書前書きもこれでOK
+			book_name = split_url[5].split(/\?/)[0]
+			if split_url.size < 7
+				chaper_name = '0'
+			else
+				chaper_name = split_url[6].split(/\?/)[0]
+			end
 
 			[book_name, chaper_name]
 		}

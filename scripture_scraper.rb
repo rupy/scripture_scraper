@@ -38,12 +38,31 @@ class ScriptureScraper
 			# bookに対して
 			names = @web_fetcher.get_names title_id
 			names.each_with_index do |(book_name, chapter_name), page_id|
+
 				@log.info("*** #{book_name} #{page_id} ***")
 				web_data = @web_fetcher.read_web_data lang, title_id, page_id
-				scripture_page = ScripturePage.new
-				doc = Nokogiri::XML.parse(web_data)
+				if web_data.nil?
+					puts '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+					next
+				end
+
+
+				scripture_page = ScripturePage.new lang, title, book_name
+				doc = Nokogiri::HTML.parse(web_data)
 				infos = scripture_page.parse_contents doc
 				all_infos_in_book.push infos
+
+				if book_name == 'introduction' && lang =='jpn'
+
+					['three', 'eight', 'js'].each do |book_name2|
+
+						scripture_page = ScripturePage.new lang, title, book_name2, 1
+						doc = Nokogiri::HTML.parse(web_data)
+						infos = scripture_page.parse_contents doc
+						all_infos_in_book.push infos
+
+					end
+				end
 			end
 			all_infos.push all_infos_in_book
 		end
