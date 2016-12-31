@@ -49,7 +49,6 @@ class FootnoteBox < ParseBase
 		end
 
 		remove_head_space_text_node footnote
-		puts footnote
 
 		fn_ref_infos = []
 		fn_st_infos = []

@@ -1,9 +1,6 @@
 require 'nokogiri'
 require './parse_base'
-require './ruby_processor'
-require './reference_processor'
-require './style_processor'
-require './footnote_processor'
+require './annotation_processor'
 require './chronicle_processor'
 
 class ScripturePage < ParseBase
@@ -24,15 +21,69 @@ class ScripturePage < ParseBase
 		puts state
 	end
 
-	def parse_verse(verse_node, type='verse')
-
-		# puts verse_node.to_html
+	def get_verse_name_and_remove_dont_highlight_anchor(verse_node)
 		# 先頭のAタグの削除
 		anchor_node = verse_node.at_css("a.dontHighlight")
 		unless anchor_node.nil?
 			anchor_node.remove
 			verse_name = anchor_node['name']
 		end
+		verse_name
+	end
+
+	def get_verse_number_and_remove_span(verse_node)
+		# 先頭の節番号の削除
+		span_node = verse_node.at_css("span.verse")
+		unless span_node.nil?
+			span_node.remove 
+			verse_num = span_node.inner_html
+			verse_num.gsub!(/\u00A0/,"")
+			raise 'non-number verse num found' unless verse_num =~ /^\d+$/
+		end
+		verse_num
+	end
+
+	def remove_duplicated_span(verse_node)
+
+		# 預言者ジョセフ・スミスの証の2重span解消
+		language_node = verse_node.at_css("span.langauge") # languageのタイポだと思われる
+		unless language_node.nil?
+			unwrap language_node
+		end
+	end
+
+	def remove_marker(verse_node)
+		marker_nodes = verse_node/"marker"
+		marker_nodes.each do |marker_node|
+			unwrap marker_node
+		end
+	end
+
+	def remove_br(verse_node)
+		br_nodes = verse_node/'br'
+		unless br_nodes.nil?
+			br_nodes.each do |br_node|
+				br_node.remove
+				@log.info('removed br node')
+			end
+		end
+	end
+
+	def remove_empty_div(verse_node)
+		eid_nodes = verse_node/"div[@eid]"
+		unless eid_nodes.nil?
+			eid_nodes.each do |eid_node|
+				unwrap eid_node
+			end
+		end
+	end
+
+	def parse_verse(verse_node, type='verse')
+
+		# puts verse_node.to_html
+		# 先頭のAタグの削除
+		verse_name = get_verse_name_and_remove_dont_highlight_anchor verse_node
+
 		if verse_name == 'closing' # 三人の証人の証で登場
 			@log.info("closing paragraph found ... skip")
 			return nil
@@ -48,122 +99,24 @@ class ScripturePage < ParseBase
 		end
 
 		# 先頭の節番号の削除
-		span_node = verse_node.at_css("span.verse")
-		unless span_node.nil?
-			span_node.remove 
-			verse_num = span_node.inner_html
-			verse_num.gsub!(/\u00A0/,"")
-			raise 'non-number verse num found' unless verse_num =~ /^\d+$/
-		end
-
-		# if @lang == 'jpn'
-		# 	ruby_process verse_node
-		# end
-
+		verse_num = get_verse_number_and_remove_span verse_node
 
 		# 預言者ジョセフ・スミスの証の2重span解消
-		language_node = verse_node.at_css("span.langauge") # languageのタイポだと思われる
-		unless language_node.nil?
-			language_node.swap language_node.children
-		end
+		remove_duplicated_span verse_node
 
 		# 教義と聖約はsupの中にmarkerタグを含んでいるので削除
-		marker_nodes = verse_node/"marker"
-		marker_nodes.each do |marker_node|
-			unwrap marker_node
-		end
+		remove_marker verse_node
 
-		br_nodes = verse_node/'br'
-		unless br_nodes.nil?
-			br_nodes.each do |br_node|
-				br_node.remove
-				@log.info('removed br node')
-			end
-		end
+		# brの削除
+		# TODO: 改行コードに変換したほうがいいんじゃないの？
+		remove_br verse_node
 
 		# なぜかアブラハム書のタイトルに<div eid="" >が追加されててエラーになったので対処
-		eid_nodes = verse_node/"div[@eid]"
-		unless eid_nodes.nil?
-			eid_nodes.each do |eid_node|
-				unwrap eid_node
-			end
-		end
+		remove_empty_div verse_node
 
-		footnote_infos = []
-		style_infos = []
-		ref_infos = []
-		begin
-			redo_flag = false # 初めfalseにしておかなけれannotationが一切見つからなかった時に無限ループになる
-			annotation_nodes = verse_node.xpath("./*[((name()='b')or(name()='span')or(name()='em')or(name()='sup')or(name()='ruby')or((name()='a')and((@class='scriptureRef')or(@href='#note'))))]") # この書き方でないと順番がめちゃくちゃになる
-			annotation_nodes.each do |annotation_node|
-
-				# 子供が複数見つかった時にはタグが入れ子になっているのであとでやり直さなければいけない
-				# 子供が一つでも子供がtextノード出ない場合は入れ子になっている（歴代史下17:4で登場）
-				# xpathによるタグの取得自体からやり直す理由はswapによってannotation_nodeの中身が空っぽになってしまうため処理が施せないことによる
-				redo_flag = annotation_node.children.length > 1
-				redo_flag |= check_children_contain_tag annotation_node
-
-				if annotation_node.name == 'em' || annotation_node.name == 'span' || annotation_node.name == 'b'
-					# 文字修飾関係の処理
-					sp = StyleProcessor.new
-					style_info = sp.process_style annotation_node
-					style_infos.push style_info
-				elsif annotation_node.name == 'sup' && annotation_node['class'] == 'studyNoteMarker'
-
-					# footnoteの中にタグが含まれている
-					anchor_node = annotation_node.next_sibling
-					anchor_node = annotation_node.previous_sibling if anchor_node.nil?
-					raise 'invalid footnote found' if anchor_node.nil?
-					redo_flag |= anchor_node.children.length != 1
-					redo_flag |= anchor_node.children.to_a.any?{|c| c.name != 'text'}
-					# 脚注の処理
-					fp = FootnoteProcessor.new @lang
-					footnote_info = fp.process_footnote annotation_node
-					footnote_infos.push footnote_info
-				elsif annotation_node.name == 'a' && annotation_node['class'] == 'scriptureRef'
-					# 聖文中で他の聖文が引用されている部分のリンクの処理
-					rp = ReferenceProcessor.new
-					ref_info = rp.process_ref annotation_node
-					ref_infos.push ref_info
-				elsif annotation_node.name == 'a' && annotation_node['href'] == '#note' && annotation_node['class'] != 'footnote'
-					puts 'aaa'
-					# ジョセフ・スミス歴史で出てくるnoteの処理	
-					rp = ReferenceProcessor.new
-					ref_info = rp.process_ref annotation_node
-					ref_infos.push ref_info
-				elsif annotation_node.name == 'a' && annotation_node['href'] == '#note' && annotation_node['class'] == 'footnote' && annotation_node.inner_text == ''
-					# 英語の雅歌で出てくる空っぽのノード
-					unwrap annotation_node
-				elsif annotation_node.name == 'a' && annotation_node['class'] == 'footnote'
-					# マラキの終わりにある特殊な脚注
-					next
-				elsif annotation_node.name == 'ruby'
-					if annotation_node.children.length == 1 && annotation_node.child.name == 'text' # 1ne1:19でrubyタグが分離している部分がある
-						if annotation_node.next_sibling.name == 'ruby'
-							@log.debug('split ruby found')
-							annotation_node.next_sibling.child.add_previous_sibling annotation_node.child
-							parent = annotation_node.parent
-							annotation_node.remove
-							puts parent.to_html
-							next
-						else
-							raise 'invalid ruby found'
-						end
-					end
-					rp = RubyProcessor.new
-					rp.ruby_process annotation_node
-				else
-					raise 'Unknown annotation found'
-				end
-
-				if redo_flag
-					# @log.debug("Annotation process redo:")
-					print '+'
-					# @log.debug("#{verse_node.to_html}")
-					break
-				end
-			end
-		end while redo_flag
+		# アノテーションの処理
+		ap = AnnotationProcessor.new @lang
+		footnote_infos, style_infos, ref_infos = ap.process_annotations verse_node
 
 		text = verse_node.inner_html
 
