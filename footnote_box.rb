@@ -3,26 +3,20 @@ require './footnote_reference_processor'
 
 class FootnoteBox < ParseBase
 
-	def initialize(lang)
+	def initialize
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
-
-		@lang = lang
 
 	end
 
 	def get_footnote(doc)
 		# footnoteの部分を取得
-		if @lang == 'jpn'
-			footnotes = doc/"div[@class='footnotes']//span[@class='block']"
-		else
-			footnotes = doc/"div[@class='footnotes']//span[@class='div']"
-		end
+		footnotes = doc.xpath("//div[@class='footnotes']//span[(@class='block')or(@class='div')]")
 
-		if footnotes.size != 1
+		if footnotes.size > 1
 			raise 'footnote is not only one'
-		elsif footnotes.empty?
+		elsif footnotes.empty? # エテル5章4節の脚注が空
 			nil
 		else
 			footnotes[0]

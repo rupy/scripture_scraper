@@ -5,12 +5,10 @@ require './footnote_processor'
 
 
 class AnnotationProcessor < ParseBase
-	def initialize(lang)
+	def initialize
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
-
-		@lang = lang
 	end
 
 	def process_annotations(verse_node)
@@ -43,7 +41,7 @@ class AnnotationProcessor < ParseBase
 					redo_flag |= anchor_node.children.length != 1
 					redo_flag |= anchor_node.children.to_a.any?{|c| c.name != 'text'}
 					# 脚注の処理
-					fp = FootnoteProcessor.new @lang
+					fp = FootnoteProcessor.new
 					footnote_info = fp.process_footnote annotation_node
 					footnote_infos.push footnote_info
 				elsif annotation_node.name == 'a' && annotation_node['class'] == 'scriptureRef'

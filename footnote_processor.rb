@@ -7,12 +7,10 @@ class FootnoteProcessor < ParseBase
 
 	ALLOWED_NODE_TYPE = ['text', 'ruby']
 
-	def initialize(lang)
+	def initialize
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
-
-		@lang = lang
 	end
 
 	def get_footnote(url)
@@ -21,7 +19,7 @@ class FootnoteProcessor < ParseBase
 		fwf.fetch_and_store url
 		web_data = fwf.read_footnote_data(url)
 
-		fb = FootnoteBox.new @lang
+		fb = FootnoteBox.new
 		footnote_content, fn_ref_infos, fn_st_infos = fb.parse_footnote_contents web_data
 
 		[footnote_content, fn_ref_infos, fn_st_infos]

@@ -115,7 +115,7 @@ class ScripturePage < ParseBase
 		remove_empty_div verse_node
 
 		# アノテーションの処理
-		ap = AnnotationProcessor.new @lang
+		ap = AnnotationProcessor.new
 		footnote_infos, style_infos, ref_infos = ap.process_annotations verse_node
 
 		text = verse_node.inner_html

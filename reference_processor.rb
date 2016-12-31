@@ -18,7 +18,6 @@ class ReferenceProcessor < ParseBase
 		end
 	end
 
-
 	def process_ref(ref_node)
 		@log.debug("scripture reference found")
 
