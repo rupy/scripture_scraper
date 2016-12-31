@@ -46,7 +46,6 @@ class ScriptureScraper
 					next
 				end
 
-
 				scripture_page = ScripturePage.new lang, title, book_name
 				doc = Nokogiri::HTML.parse(web_data)
 				infos = scripture_page.parse_contents doc

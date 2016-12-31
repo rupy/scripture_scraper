@@ -2,11 +2,16 @@ require 'nokogiri'
 require './parse_base'
 require './annotation_processor'
 require './chronicle_processor'
+require './japanese_introduction_processor'
 
 class ScripturePage < ParseBase
 
+	include JapaneseIntroductionProcessor
+
 	STATE_NORMAL = 0
 	STATE_BOOK_CHANGE = 1
+
+	VERSE_TYPE_CHAPTER_TITLE = "chapter_title"
 
 	def initialize(lang, title, book)
 		# ロガーの初期化
@@ -185,6 +190,7 @@ class ScripturePage < ParseBase
 					@log.debug('verse')
 					info = parse_verse(verse_node) # p要素
 				else
+					# TODO: ここに来る要素って何？要確認。
 					@log.debug(type)
 					info = parse_verse(verse_node, type) # p要素
 				end
@@ -314,41 +320,27 @@ class ScripturePage < ParseBase
 		verse_infos
 	end
 
-
 	def parse_contents(doc)
 
 		# 聖文の部分を取得
 		content = doc/"div[@id='content']//div[@id='primary']"
 
-		book_list_not_in_jpn = ['three', 'eight', 'js']
 		# 日本語の３人の証人の証
-		if @title == 'bom' && book_list_not_in_jpn.include?(@book) && @lang == 'jpn'
-			book_idx = book_list_not_in_jpn.index @book
+		if @title == 'bom' && BOOK_LIST_NOT_IN_JPN.include?(@book) && @lang == 'jpn'
 
-			# タイトルの部分を取得し、削除
-			content = content/"div[@class='topic']"
-			h2_nodes = content[book_idx]/'h2'
-			title_info = parse_verse(h2_nodes[1], 'title')
-			title_name = title_info[:text]
-			@log.info("@@ #{title_name} @@")
-			h2_nodes.remove
-
-			# 残りの情報を取得
-			infos = parse_verses(content[book_idx], 'article')
-
-			all_infos = [title_info] + infos
+			all_infos = japanese_introduction_process(content, @book)
 
 			return all_infos
-		else
-
-			# タイトルの部分を取得
-			detail = doc/"div[@id='details']//h1"
-			info = parse_verse(detail[0], 'title')
-			title_name = info[:text]
-			@log.info("@@ #{title_name} @@")
 
 		end
-		all_infos = [info]
+
+		# タイトルの部分を取得
+		detail = doc/"div[@id='details']//h1"
+		title_info = parse_verse(detail[0], 'title')
+		title_name = title_info[:text]
+		@log.info("@@ #{title_name} @@")
+
+		all_infos = [title_info]
 		content.children.each do |node|
 
 			line = nil
@@ -365,10 +357,11 @@ class ScripturePage < ParseBase
 				cp = ChronicleProcessor.new
 				infos = cp.parse_chr node
 				all_infos.push *infos
+
 			elsif node.name == "h2"
 				@log.info("chapter_title")
 				# puts node.inner_html
-				info = build_info(type: "chapter_title", text: node.inner_html)
+				info = build_info(type: VERSE_TYPE_CHAPTER_TITLE, text: node.inner_html)
 				all_infos.push info
 
 			elsif ["subtitle", "intro", "studyIntro", "closing"].include?(node["class"])
@@ -391,7 +384,6 @@ class ScripturePage < ParseBase
 				all_infos.push info
 			elsif node["class"] == "summary"
 				@log.info(node["class"])
-				# puts node.to_html
 				summary_node = check_and_get_child(node) # divの子供はp要素を持っている
 				info = parse_verse(summary_node, node["class"])
 				all_infos.push info
