@@ -44,8 +44,6 @@ class ParseBase
 
 	# 順に前の兄弟ノードのテキスト数をカウントしていく
 	def position_count(node)
-		# puts '============'
-		# puts node.to_html
 		pos = 0
 		sib = node.previous_sibling
 		until sib.nil?

@@ -8,7 +8,7 @@ class ScripturePage < ParseBase
 	STATE_NORMAL = 0
 	STATE_BOOK_CHANGE = 1
 
-	def initialize(lang, title, book, state=STATE_NORMAL)
+	def initialize(lang, title, book)
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
@@ -16,9 +16,7 @@ class ScripturePage < ParseBase
 		@lang = lang
 		@title = title
 		@book = book
-		@state = state
-
-		puts state
+		@state = STATE_NORMAL
 	end
 
 	def get_verse_name_and_remove_dont_highlight_anchor(verse_node)
@@ -321,42 +319,34 @@ class ScripturePage < ParseBase
 
 		# 聖文の部分を取得
 		content = doc/"div[@id='content']//div[@id='primary']"
-		if @state == STATE_NORMAL
+
+		book_list_not_in_jpn = ['three', 'eight', 'js']
+		# 日本語の３人の証人の証
+		if @title == 'bom' && book_list_not_in_jpn.include?(@book) && @lang == 'jpn'
+			book_idx = book_list_not_in_jpn.index @book
+
+			# タイトルの部分を取得し、削除
+			content = content/"div[@class='topic']"
+			h2_nodes = content[book_idx]/'h2'
+			title_info = parse_verse(h2_nodes[1], 'title')
+			title_name = title_info[:text]
+			@log.info("@@ #{title_name} @@")
+			h2_nodes.remove
+
+			# 残りの情報を取得
+			infos = parse_verses(content[book_idx], 'article')
+
+			all_infos = [title_info] + infos
+
+			return all_infos
+		else
+
 			# タイトルの部分を取得
 			detail = doc/"div[@id='details']//h1"
 			info = parse_verse(detail[0], 'title')
 			title_name = info[:text]
 			@log.info("@@ #{title_name} @@")
 
-		else
-			book_list = ['three', 'eight', 'js']
-			# 日本語の３人の証人の証
-			if @title == 'bom' && book_list.include?(@book) && @lang == 'jpn'
-				book_idx = book_list.index @book
-				puts book_idx
-				# タイトルの部分を取得
-				content = content/"div[@class='topic']"
-				h2_nodes = content[book_idx]/'h2'
-				info = parse_verse(h2_nodes[1], 'title')
-				title_name = info[:text]
-				@log.info("@@ #{title_name} @@")
-				h2_nodes.remove
-				@log.info("finish")
-				infos = parse_verses(content[book_idx], 'article')
-
-				if @book == 'js'
-					@log.info("finish changing")
-					@state = STATE_NORMAL
-				else
-					@log.info("start changing book")
-				end
-			else
-				raise 'invalid state'
-			end
-
-			all_infos = [info] + infos
-
-			return all_infos
 		end
 		all_infos = [info]
 		content.children.each do |node|

@@ -56,7 +56,7 @@ class ScriptureScraper
 
 					['three', 'eight', 'js'].each do |book_name2|
 
-						scripture_page = ScripturePage.new lang, title, book_name2, 1
+						scripture_page = ScripturePage.new lang, title, book_name2
 						doc = Nokogiri::HTML.parse(web_data)
 						infos = scripture_page.parse_contents doc
 						all_infos_in_book.push infos

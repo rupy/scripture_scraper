@@ -46,7 +46,7 @@ class FootnoteProcessor < ParseBase
 
 		if check_children_contain_tag anchor_node
 			@log.debug("nest footnote found")
-			raise 'unknown footnote nest found' if anchor_node.children.to_a.any?{|c| c.name != 'text' && c.name != 'ruby'}
+			raise 'unknown footnote nest found' if anchor_node.children.to_a.any?{|c| !ALLOWED_NODE_TYPE.include? c.name }
 			text = anchor_node.inner_text
 			# raise "non-text node found in #{anchor_node.to_html}"
 		else
