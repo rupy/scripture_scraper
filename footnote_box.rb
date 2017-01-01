@@ -1,4 +1,3 @@
-require 'logger'
 require './footnote_reference_processor'
 
 class FootnoteBox < ParseBase

@@ -1,11 +1,6 @@
-require 'logger'
 require './parse_base'
 
-class ChronicleProcessor < ParseBase
-
-	def initialize
-		super
-	end
+module ChronicleProcessor
 
 	def parse_chr_table(table_node)
 

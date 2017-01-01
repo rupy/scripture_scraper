@@ -1,11 +1,13 @@
 require 'nokogiri'
 require './parse_base'
 require './verse_processor'
+require './chronicle_processor'
 
 class ScripturePage < ParseBase
 
 	include JapaneseIntroductionProcessor
 	include VerseProcessor
+	include ChronicleProcessor
 
 	STATE_NORMAL = 0
 	STATE_BOOK_CHANGE = 1
@@ -196,8 +198,7 @@ class ScripturePage < ParseBase
 			next if node.name == "ul" && node["class"].start_with?("prev-next")
 
 			if @book == 'chron-order'
-				cp = ChronicleProcessor.new
-				infos = cp.parse_chr node
+				infos = parse_chr node
 				all_infos.push *infos
 
 			elsif node.name == "h2"

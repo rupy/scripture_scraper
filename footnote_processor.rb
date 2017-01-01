@@ -1,11 +1,10 @@
-require 'logger'
 require './parse_base'
 require './footnote_web_fetcher'
 require './footnote_box'
 
 class FootnoteProcessor < ParseBase
 
-	ALLOWED_NODE_TYPE = ['text', 'ruby']
+	ALLOWED_NODE_TYPE = ['text', 'ruby', 'span']
 
 	def initialize
 		super
@@ -34,7 +33,7 @@ class FootnoteProcessor < ParseBase
 		end
 
 		# anchorはaタグ
-		raise "invlalid footnote found '#{anchor_node.parent.to_html}'" unless anchor_node.name == 'a'
+		raise "invlalid footnote found '#{anchor_node.to_html}'" unless anchor_node.name == 'a'
 
 		return [anchor_node, pos]
 	end
@@ -44,7 +43,7 @@ class FootnoteProcessor < ParseBase
 
 		if check_children_contain_tag anchor_node
 			@log.debug("nest footnote found")
-			raise 'unknown footnote nest found' if anchor_node.children.to_a.any?{|c| !ALLOWED_NODE_TYPE.include? c.name }
+			raise "unknown footnote nest found #{anchor_node.parent.to_html}" if anchor_node.children.to_a.any?{|c| !ALLOWED_NODE_TYPE.include? c.name }
 			text = anchor_node.inner_text
 			# raise "non-text node found in #{anchor_node.to_html}"
 		else
