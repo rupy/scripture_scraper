@@ -65,7 +65,8 @@ class ScriptureScraper
 			end
 			all_infos.push all_infos_in_book
 		end
-		# @data_output.write_infos_to_csv(all_infos)
+		iw = InfoWriter.new
+		iw.write_infos_to_csv(all_infos)
 
 	end
 
