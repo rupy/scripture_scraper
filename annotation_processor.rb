@@ -16,7 +16,7 @@ class AnnotationProcessor < ParseBase
 		ref_infos = []
 		begin
 			redo_flag = false # 初めfalseにしておかなけれannotationが一切見つからなかった時に無限ループになる
-			annotation_nodes = verse_node.xpath("./*[((name()='b')or(name()='span')or(name()='em')or(name()='sup')or(name()='ruby')or((name()='a')and((@class='scriptureRef')or(@href='#note'))))]") # この書き方でないと順番がめちゃくちゃになる
+			annotation_nodes = verse_node.xpath("./*[((name()='b')or(name()='span')or(name()='em')or(name()='sup')or(name()='ruby')or((name()='a')))]") # この書き方でないと順番がめちゃくちゃになる
 			annotation_nodes.each do |annotation_node|
 
 				# 子供が複数見つかった時にはタグが入れ子になっているのであとでやり直さなければいけない
@@ -58,6 +58,11 @@ class AnnotationProcessor < ParseBase
 				elsif annotation_node.name == 'a' && annotation_node['class'] == 'footnote'
 					# マラキの終わりにある特殊な脚注
 					next
+				elsif annotation_node.name == 'a' && annotation_node['href'].start_with?('https')
+					# 教義と聖約の序文のリンク	
+					rp = ReferenceProcessor.new
+					ref_info = rp.process_ref annotation_node
+					ref_infos.push ref_info
 				elsif annotation_node.name == 'ruby'
 					if annotation_node.children.length == 1 && annotation_node.child.name == 'text' # 1ne1:19でrubyタグが分離している部分がある
 						if annotation_node.next_sibling.name == 'ruby'

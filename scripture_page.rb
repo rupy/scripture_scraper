@@ -156,6 +156,9 @@ class ScripturePage < ParseBase
 				@log.debug("center")
 				info = parse_verse(verse_node, 'center')
 				verse_infos.push(info) unless info.nil?
+			elsif verse_node.name == "h2" # 日本語の教義と聖約序文で登場（英語だとtopic_header、TODO: 英語と日本語で揃えるべき？？）
+				@log.debug("topic_header")
+				info = parse_verse(verse_node, 'topic_header')
 			else
 				raise "Unknown node '#{verse_node.to_html}' found"
 			end
