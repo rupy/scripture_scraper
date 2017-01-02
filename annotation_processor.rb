@@ -58,6 +58,10 @@ class AnnotationProcessor < ParseBase
 				elsif annotation_node.name == 'a' && annotation_node['class'] == 'footnote'
 					# マラキの終わりにある特殊な脚注
 					next
+				elsif annotation_node.name == 'a' && annotation_node['name'] == 'note'
+					# ジョセフ・スミス歴史の最後のアスタリスク
+					annotation_node.remove
+					next
 				elsif annotation_node.name == 'a' && annotation_node['href'].start_with?('https')
 					# 教義と聖約の序文のリンク	
 					rp = ReferenceProcessor.new
@@ -83,7 +87,7 @@ class AnnotationProcessor < ParseBase
 				end
 
 				if redo_flag
-					print '+'
+					# print '+'
 					# @log.debug("#{verse_node.to_html}")
 					break
 				end

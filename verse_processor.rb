@@ -63,6 +63,7 @@ module VerseProcessor
 		end
 	end
 
+
 	def parse_verse(verse_node, type='verse')
 
 		# puts verse_node.to_html
@@ -105,6 +106,7 @@ module VerseProcessor
 
 		text = verse_node.inner_html
 
+		# 画像を置き換える
 		if verse_node.child.name == 'img'
 			@log.debug("img tag found")
 			img_node = check_and_get_child(verse_node)

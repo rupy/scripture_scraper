@@ -49,14 +49,39 @@ class ScripturePage < ParseBase
 				words = verse_node['words'] # これは何？
 				info = parse_verse(verse_node, 'signature') # div要素
 				verse_infos.push(info) unless info.nil?
-			elsif verse_node.name == "div" && verse_node['class'] == 'figure'
-				if check_and_get_child(verse_node).name == 'ol' && check_and_get_child(verse_node)['class'] == 'number' # モルモン書の概要で登場, アブラハム書の模写にも
+			elsif verse_node.name == "div" && verse_node['class'] == 'figure' # 日本語版アブラハム書の模写
+				if verse_node.children.length == 2
+					h3_node = verse_node.children[0]
+					ul_node = verse_node.children[1]
+
+					raise "Unknown node '#{h3_node.to_html}' found" unless h3_node.name == 'h3'
+					raise "Unknown node '#{ul_node.to_html}' found" unless ul_node.name == 'ul' && ul_node['class'] == 'noMarker'
+
+					info = parse_verse(h3_node, 'figure_number')
+					verse_infos.push(info) unless info.nil?
+
+					ul_node.children.each do |li_node|
+
+						# テキストノードが混ざっているので取り除く
+						next if empty_text_node? li_node
+
+						info = parse_verse(li_node, 'figure_number')
+						verse_infos.push(info) unless info.nil?
+					end
+
+				elsif check_and_get_child(verse_node).name == 'ol' && check_and_get_child(verse_node)['class'] == 'number' # モルモン書の概要で登場, アブラハム書の模写模写（英語）にも
 					check_and_get_child(verse_node).children.each do |li_node|
 						next if empty_text_node? li_node
-						eid = li_node['eid'] # これは何？
-						words = li_node['words'] # これは何？
-						@log.debug("figure_number")
-						info = parse_verse(li_node, 'figure_number')
+
+						if li_node.name == 'h3'
+							@log.debug("h3")
+							info = parse_verse(li_node, 'h3')
+						else
+							@log.debug("figure_number")
+							info = parse_verse(li_node, 'figure_number')
+						end
+						eid = li_node['eid'] # これは何？→日本語ではないので無視
+						words = li_node['words'] # これは何？→日本語ではないので無視
 						verse_infos.push(info) unless info.nil?
 					end
 				elsif check_and_get_child(verse_node).name == 'ul' && check_and_get_child(verse_node)['class'] == 'noMarker' # D&Cの前書きで登場
@@ -140,6 +165,7 @@ class ScripturePage < ParseBase
 				div_node = check_and_get_child(li_node)
 				div_node.children.each do |symbol_node|
 					if symbol_node.name == 'span' && symbol_node['class'] == 'label'
+						# ジョセフ・スミス歴史のアスタリスク
 						@log.debug("label found ... skip")
 						next
 					else
@@ -159,6 +185,11 @@ class ScripturePage < ParseBase
 			elsif verse_node.name == "h2" # 日本語の教義と聖約序文で登場（英語だとtopic_header、TODO: 英語と日本語で揃えるべき？？）
 				@log.debug("topic_header")
 				info = parse_verse(verse_node, 'topic_header')
+			elsif verse_node.name == "div" && verse_node['class'] == 'summary'
+				@log.debug("summary")
+				p_node = check_and_get_child(verse_node)
+				raise "Unknown node '#{p_node.to_html}' found" unless p_node.name == 'p'
+				info = parse_verse(p_node, 'summary')
 			else
 				raise "Unknown node '#{verse_node.to_html}' found"
 			end

@@ -4,7 +4,7 @@ require './footnote_box'
 
 class FootnoteProcessor < ParseBase
 
-	ALLOWED_NODE_TYPE = ['text', 'ruby', 'span']
+	ALLOWED_NODE_TYPE = ['text', 'ruby', 'span', 'b']
 
 	def initialize
 		super
