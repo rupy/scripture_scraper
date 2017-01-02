@@ -1,9 +1,14 @@
 require 'yaml'
 require 'csv'
+require 'logger'
 
 class InfoWriter
 
 	def initialize
+		# ロガーの初期化
+		@log = Logger.new(STDERR)
+		@log.level=Logger::DEBUG
+
 		@config = YAML.load_file('config/config.yml')
 		@output_csv_dir = @config['structure']['output_csv_dir']
 	end
@@ -12,7 +17,7 @@ class InfoWriter
 		output_csv_file = "#{@output_csv_dir}/scripture.csv"
 		CSV.open(output_csv_file, 'w') do |writer|
 			id = 0
-			@all_infos.each_with_index do |book_infos, title_id|
+			all_infos.each_with_index do |book_infos, title_id|
 				book_infos.each_with_index do |infos, book_id|
 					infos[:infos].each_with_index do |info, chapter_id|
 						writer << [id, title_id, book_id, chapter_id, infos[:title], infos[:book], infos[:chapter], info[:verse_name], info[:verse_num], info[:type], info[:text]]
@@ -34,7 +39,7 @@ class InfoWriter
 			fn_id = 0
 			fn_rf_id = 0
 			fn_st_id = 0
-			@all_infos.each_with_index do |book_infos, title_id|
+			all_infos.each_with_index do |book_infos, title_id|
 				book_infos.each_with_index do |infos, book_id|
 					infos[:infos].each_with_index do |info, chapter_id|
 						fn_infos = info[:footnote_infos]
@@ -66,7 +71,7 @@ class InfoWriter
 		CSV.open(style_csv_file, 'w') do |writer|
 			id = 0
 			st_id = 0
-			@all_infos.each_with_index do |book_infos, title_id|
+			all_infos.each_with_index do |book_infos, title_id|
 				book_infos.each_with_index do |infos, book_id|
 					infos[:infos].each_with_index do |info, chapter_id|
 						st_infos = info[:style_infos]
@@ -88,13 +93,13 @@ class InfoWriter
 		CSV.open(ref_csv_file, 'w') do |writer|
 			id = 0
 			rf_id = 0
-			@all_infos.each_with_index do |book_infos, title_id|
+			all_infos.each_with_index do |book_infos, title_id|
 				book_infos.each_with_index do |infos, book_id|
 					infos[:infos].each_with_index do |info, chapter_id|
 						rf_infos = info[:ref_infos]
 						unless rf_infos.nil? || rf_infos.empty?
 							rf_infos.each do |rf_info|
-								writer << [rf_id, id, title_id, book_id, chapter_id, rf_info[:href], rf_info[:pos], rf_info[:length], rf_info[:text]]
+								writer << [rf_id, id, title_id, book_id, chapter_id, infos[:title], infos[:book], infos[:chapter], rf_info[:href], rf_info[:pos], rf_info[:length], rf_info[:text]]
 								rf_id += 1
 							end
 						end
@@ -105,7 +110,7 @@ class InfoWriter
 		end
 	end
 
-	def output_csv(all_infos)
+	def write_infos_to_csv(all_infos)
 
 
 		@log.info("writing csv files")

@@ -2,6 +2,7 @@ require 'logger'
 require 'yaml'
 require './web_fetcher'
 require './scripture_page'
+require './info_writer'
 
 class ScriptureScraper
 
@@ -49,7 +50,8 @@ class ScriptureScraper
 				scripture_page = ScripturePage.new lang, title, book_name
 				doc = Nokogiri::HTML.parse(web_data)
 				infos = scripture_page.parse_contents doc
-				all_infos_in_book.push infos
+				# all_infos_in_book.push infos
+				all_infos_in_book.push({title: title, book: book_name, chapter: chapter_name, infos: infos})
 
 				if book_name == 'introduction' && lang =='jpn'
 
@@ -58,7 +60,8 @@ class ScriptureScraper
 						scripture_page = ScripturePage.new lang, title, book_name2
 						doc = Nokogiri::HTML.parse(web_data)
 						infos = scripture_page.parse_contents doc
-						all_infos_in_book.push infos
+						# all_infos_in_book.push infos
+						all_infos_in_book.push({title: title, book: book_name2, chapter: chapter_name, infos: infos})
 
 					end
 				end
