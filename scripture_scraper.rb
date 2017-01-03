@@ -53,7 +53,7 @@ class ScriptureScraper
 				# all_infos_in_book.push infos
 				all_infos_in_book.push({title: title, book: book_name, chapter: chapter_name, infos: infos})
 
-				if book_name == 'introduction' && lang =='jpn'
+				if title == 'bom' && book_name == 'introduction' && lang =='jpn'
 
 					['three', 'eight', 'js'].each do |book_name2|
 

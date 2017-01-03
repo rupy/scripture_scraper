@@ -63,6 +63,13 @@ module VerseProcessor
 		end
 	end
 
+	def split_text_by_zero_width_space(text)
+		@log.debug("split #{text.split(/[\u200b]/)}")
+	end
+
+	def remove_zero_width_space(text)
+		text.gsub!(/[\u200b]/,'')
+	end
 
 	def parse_verse(verse_node, type='verse')
 
@@ -109,6 +116,9 @@ module VerseProcessor
 		text = verse_node.inner_html
 		text.strip!
 
+		# split_text_by_zero_width_space text
+		remove_zero_width_space text
+
 		# 画像を置き換える
 		if verse_node.child.name == 'img'
 			@log.debug("img tag found")
@@ -119,7 +129,7 @@ module VerseProcessor
 			text = img_info
 		end
 
-		@log.info(text.each_codepoint.map{|n| n.to_s(16) })
+		# @log.debug(text.each_codepoint.map{|n| n.to_s(16) })
 
 
 
