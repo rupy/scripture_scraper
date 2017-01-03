@@ -66,7 +66,7 @@ module VerseProcessor
 
 	def parse_verse(verse_node, type='verse')
 
-		# puts verse_node.to_html
+		# puts verse_node.content
 		# 先頭のAタグの削除
 		verse_name = get_verse_name_and_remove_dont_highlight_anchor verse_node
 
@@ -104,7 +104,10 @@ module VerseProcessor
 		ap = AnnotationProcessor.new
 		footnote_infos, style_infos, ref_infos = ap.process_annotations verse_node
 
+		remove_spaces verse_node
+
 		text = verse_node.inner_html
+		text.strip!
 
 		# 画像を置き換える
 		if verse_node.child.name == 'img'
@@ -115,6 +118,10 @@ module VerseProcessor
 			img_info = "{src=#{src},alt=#{alt}}"
 			text = img_info
 		end
+
+		@log.info(text.each_codepoint.map{|n| n.to_s(16) })
+
+
 
 		# 特殊な文字を置き換える
 		# nbsp_char_pattern = /[\u00A0]/

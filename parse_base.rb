@@ -69,4 +69,15 @@ class ParseBase
 	def check_children_contain_tag(node)
 		node.children.to_a.any?{|c| c.name != 'text'}
 	end
+
+	def remove_spaces(verse_node)
+		verse_node.children.each do |node|
+			if node.name == 'text' && node.to_html =~ /\A\s+\z/
+				node.remove
+				@log.debug("del space node: '#{node.to_html}'")
+			end
+		end
+	end
+
+
 end

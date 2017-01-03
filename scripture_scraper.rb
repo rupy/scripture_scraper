@@ -48,7 +48,7 @@ class ScriptureScraper
 				end
 
 				scripture_page = ScripturePage.new lang, title, book_name
-				doc = Nokogiri::HTML.parse(web_data)
+				doc = Nokogiri::HTML.parse(web_data){ |config| config.noblanks }
 				infos = scripture_page.parse_contents doc
 				# all_infos_in_book.push infos
 				all_infos_in_book.push({title: title, book: book_name, chapter: chapter_name, infos: infos})
@@ -68,7 +68,7 @@ class ScriptureScraper
 			end
 			all_infos.push all_infos_in_book
 		end
-		iw = InfoWriter.new
+		iw = InfoWriter.new lang
 		iw.write_infos_to_csv(all_infos)
 
 	end

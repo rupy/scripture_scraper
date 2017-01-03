@@ -4,17 +4,23 @@ require 'logger'
 
 class InfoWriter
 
-	def initialize
+	def initialize(lang)
 		# ロガーの初期化
 		@log = Logger.new(STDERR)
 		@log.level=Logger::DEBUG
 
 		@config = YAML.load_file('config/config.yml')
 		@output_csv_dir = @config['structure']['output_csv_dir']
+
+		@lang = lang
+	end
+
+	def mkdir_unless_exist(dir_path)
+		Dir.mkdir(dir_path) unless FileTest.exist?(dir_path)
 	end
 
 	def write_scripture_info(all_infos)
-		output_csv_file = "#{@output_csv_dir}/scripture.csv"
+		output_csv_file = "#{@output_csv_dir}/#{@lang}/scripture.csv"
 		CSV.open(output_csv_file, 'w') do |writer|
 			id = 0
 			all_infos.each_with_index do |book_infos, title_id|
@@ -29,9 +35,9 @@ class InfoWriter
 	end
 
 	def write_footnote_info(all_infos)
-		footnote_csv_file = "#{@output_csv_dir}/footnotes.csv"
-		fn_ref_csv_file = "#{@output_csv_dir}/footnote_references.csv"
-		fn_st_csv_file = "#{@output_csv_dir}/footnote_styles.csv"
+		footnote_csv_file = "#{@output_csv_dir}/#{@lang}/footnotes.csv"
+		fn_ref_csv_file = "#{@output_csv_dir}/#{@lang}/footnote_references.csv"
+		fn_st_csv_file = "#{@output_csv_dir}/#{@lang}/footnote_styles.csv"
 		CSV.open(footnote_csv_file, 'w') do |writer|
 		CSV.open(fn_ref_csv_file, 'w') do |writer_fn_ref|
 		CSV.open(fn_st_csv_file, 'w') do |writer_fn_st|
@@ -67,7 +73,7 @@ class InfoWriter
 	end
 
 	def write_style_info(all_infos)
-		style_csv_file = "#{@output_csv_dir}/styles.csv"
+		style_csv_file = "#{@output_csv_dir}/#{@lang}/styles.csv"
 		CSV.open(style_csv_file, 'w') do |writer|
 			id = 0
 			st_id = 0
@@ -89,7 +95,7 @@ class InfoWriter
 	end
 
 	def write_reference_info(all_infos)
-		ref_csv_file = "#{@output_csv_dir}/references.csv"
+		ref_csv_file = "#{@output_csv_dir}/#{@lang}/references.csv"
 		CSV.open(ref_csv_file, 'w') do |writer|
 			id = 0
 			rf_id = 0
@@ -114,6 +120,7 @@ class InfoWriter
 
 
 		@log.info("writing csv files")
+		mkdir_unless_exist "#{@output_csv_dir}/#{@lang}"
 
 		write_scripture_info all_infos 
 		write_footnote_info all_infos
