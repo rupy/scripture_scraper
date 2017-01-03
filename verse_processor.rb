@@ -71,6 +71,15 @@ module VerseProcessor
 		text.gsub!(/[\u200b]/,'')
 	end
 
+	def remove_tail_space_in_study_intro_in_dc(verse_node)
+		verse_node.children.each do |child_node|
+			if child_node.name == 'text' && child_node.content.end_with?(' ')
+				@log.debug("text: '#{child_node.content}'")
+				child_node.content = child_node.content.rstrip
+			end
+		end
+	end
+
 	def parse_verse(verse_node, type='verse')
 
 		# puts verse_node.content
@@ -112,6 +121,10 @@ module VerseProcessor
 		footnote_infos, style_infos, ref_infos = ap.process_annotations verse_node
 
 		remove_spaces verse_node
+
+		if type == 'studyIntro' && @title == 'd_c' && @lang == 'jpn'
+			remove_tail_space_in_study_intro_in_dc verse_node
+		end
 
 		text = verse_node.inner_html
 		text.strip!
