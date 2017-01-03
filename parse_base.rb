@@ -74,7 +74,7 @@ class ParseBase
 		verse_node.children.each do |node|
 			if node.name == 'text' && node.to_html =~ /\A\s+\z/
 				node.remove
-				@log.debug("del space node: '#{node.to_html}'")
+				# @log.debug("del space node: '#{node.to_html}'")
 			end
 		end
 	end

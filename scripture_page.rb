@@ -24,6 +24,31 @@ class ScripturePage < ParseBase
 		super()
 	end
 
+	def split_od_verse(verse_node)
+		@log.debug("splitting od verse")
+		verse_node2 = verse_node.clone
+
+		br_count = 0
+		verse_node.children.each do |child_node|
+			br_count += 1 if child_node.name == 'br'
+
+			if br_count != 0
+				child_node.remove
+			end
+		end
+
+		br_count = 0
+		verse_node2.children.each do |child_node|
+			br_count += 1 if child_node.name == 'br'
+
+			if child_node.name == 'br' || br_count != 2
+				child_node.remove
+			end
+		end
+
+		[verse_node, verse_node2]
+	end
+
 	def parse_verses(node, type='verses')
 		verse_infos = []
 		node.children.each do |verse_node|
@@ -33,12 +58,33 @@ class ScripturePage < ParseBase
 				if type == 'verses'
 					@log.debug('verse')
 					info = parse_verse(verse_node) # p要素
+					verse_infos.push(info) unless info.nil?
 				else
-					# TODO: ここに来る要素って何？要確認。
-					@log.debug(type)
-					info = parse_verse(verse_node, type) # p要素
+
+					if @title == 'd_c' && @book == 'od' && type == 'article' && verse_node.children[0]['name'] == 'p17'
+
+						verse_node1, verse_node2 = split_od_verse(verse_node)
+
+						# 1
+						@log.debug("split1: #{type}")
+						@log.debug("#{verse_node1.to_html}")
+						info = parse_verse(verse_node1, type)
+						verse_infos.push(info) unless info.nil?
+
+						# 2
+						@log.debug("split2: #{type}")
+						@log.debug("#{verse_node2.to_html}")
+						info = parse_verse(verse_node2, type)
+						verse_infos.push(info) unless info.nil?
+
+					else
+						# TODO: ここに来る要素って何？要確認。
+						@log.debug(type)
+						info = parse_verse(verse_node, type) # p要素
+
+						verse_infos.push(info) unless info.nil?
+					end
 				end
-				verse_infos.push(info) unless info.nil?
 			elsif verse_node.name == "div" && verse_node['class'] == 'closing'
 				@log.debug("closing")
 				info = parse_verse(verse_node, 'closing') # div要素
