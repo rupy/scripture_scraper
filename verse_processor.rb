@@ -173,24 +173,4 @@ module VerseProcessor
 			text: text
 		}
 	end
-
-	def build_info(
-		verse_name: nil,
-		verse_num: nil,
-		type: nil,
-		footnote_infos: nil,
-		style_infos: nil,
-		ref_infos: nil,
-		text: nil)
-		
-		info = {
-			verse_name: verse_name,
-			verse_num: verse_num,
-			type: type,
-			footnote_infos: footnote_infos,
-			style_infos: style_infos,
-			ref_infos: ref_infos,
-			text: text
-		}
-	end
 end

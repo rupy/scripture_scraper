@@ -286,7 +286,6 @@ class ScripturePage < ParseBase
 			elsif node.name == "h2"
 				@log.info("chapter_title")
 				# puts node.inner_html
-				# info = build_info(type: VERSE_TYPE_CHAPTER_TITLE, text: node.inner_html)
 				info = parse_verse(node, VERSE_TYPE_CHAPTER_TITLE)
 				all_infos.push info
 
