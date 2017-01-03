@@ -2,6 +2,7 @@ require './parse_base'
 require './annotation_processor'
 require './chronicle_processor'
 require './japanese_introduction_processor'
+require './ruby_processor_by_text'
 
 
 module VerseProcessor
@@ -49,7 +50,7 @@ module VerseProcessor
 		unless br_nodes.nil?
 			br_nodes.each do |br_node|
 				br_node.replace("\n")
-				@log.info('replace br node with newline')
+				@log.debug('replace br node with newline')
 			end
 		end
 	end
@@ -74,7 +75,7 @@ module VerseProcessor
 	def remove_tail_space_in_study_intro_in_dc(verse_node)
 		verse_node.children.each do |child_node|
 			if child_node.name == 'text' && child_node.content.end_with?(' ')
-				@log.debug("text: '#{child_node.content}'")
+				# @log.debug("text: '#{child_node.content}'")
 				child_node.content = child_node.content.rstrip
 			end
 		end
@@ -126,7 +127,9 @@ module VerseProcessor
 			remove_tail_space_in_study_intro_in_dc verse_node
 		end
 
-		text = verse_node.inner_html
+		html = verse_node.inner_html
+
+		text = verse_node.text
 		text.strip!
 
 		# split_text_by_zero_width_space text
@@ -142,6 +145,14 @@ module VerseProcessor
 			text = img_info
 		end
 
+		if @title == 'bom' && @lang == 'jpn' && @book == 'bofm-title' && verse_name == 'p3'
+			rpbt = RubyProcessorByText.new
+			text = rpbt.ruby_process(text)
+			text.gsub!(/\s/, "\n")
+		end
+
+		puts text
+
 		# @log.debug(text.each_codepoint.map{|n| n.to_s(16) })
 
 
@@ -153,16 +164,28 @@ module VerseProcessor
 		# 	text.gsub!(nbsp_char_pattern, " ")
 		# end
 
-		# puts "++++++++++++++++++"
+		raise "Unknown tag '#{$1}' found in '#{html}'" if text =~ /(<[^>]+>)/
 
-		# puts text
-		# puts verse_name
-		# puts verse_num
-		# print footnote_markers, footnote_hrefs, footnote_rels, footnote_words
-		# puts
+		info = {
+			verse_name: verse_name,
+			verse_num: verse_num,
+			type: type,
+			footnote_infos: footnote_infos,
+			style_infos: style_infos,
+			ref_infos: ref_infos,
+			text: text
+		}
+	end
 
-		raise "Unknown tag '#{$1}' found in '#{text}'" if text =~ /(<[^>]+>)/
-
+	def build_info(
+		verse_name: nil,
+		verse_num: nil,
+		type: nil,
+		footnote_infos: nil,
+		style_infos: nil,
+		ref_infos: nil,
+		text: nil)
+		
 		info = {
 			verse_name: verse_name,
 			verse_num: verse_num,

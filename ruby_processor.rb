@@ -1,4 +1,3 @@
-require 'logger'
 require './parse_base'
 
 class RubyProcessor < ParseBase
@@ -74,6 +73,5 @@ class RubyProcessor < ParseBase
 		# rubyタグ自体の削除
 		unwrap ruby_node
 	end
-
 end
 
