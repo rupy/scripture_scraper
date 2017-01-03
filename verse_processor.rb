@@ -44,12 +44,12 @@ module VerseProcessor
 		end
 	end
 
-	def remove_br(verse_node)
+	def replace_br_with_newline(verse_node)
 		br_nodes = verse_node/'br'
 		unless br_nodes.nil?
 			br_nodes.each do |br_node|
-				br_node.remove
-				@log.info('removed br node')
+				br_node.replace("\n")
+				@log.info('replace br node with newline')
 			end
 		end
 	end
@@ -102,7 +102,7 @@ module VerseProcessor
 
 		# brの削除
 		# TODO: 改行コードに変換したほうがいいんじゃないの？
-		remove_br verse_node
+		replace_br_with_newline verse_node
 
 		# なぜかアブラハム書のタイトルに<div eid="" >が追加されててエラーになったので対処
 		remove_empty_div verse_node

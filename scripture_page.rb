@@ -185,6 +185,7 @@ class ScripturePage < ParseBase
 			elsif verse_node.name == "h2" # 日本語の教義と聖約序文で登場（英語だとtopic_header、TODO: 英語と日本語で揃えるべき？？）
 				@log.debug("topic_header")
 				info = parse_verse(verse_node, 'topic_header')
+				verse_infos.push(info) unless info.nil?
 			elsif verse_node.name == "div" && verse_node['class'] == 'summary'
 				@log.debug("summary")
 				p_node = check_and_get_child(verse_node)
@@ -238,7 +239,8 @@ class ScripturePage < ParseBase
 			elsif node.name == "h2"
 				@log.info("chapter_title")
 				# puts node.inner_html
-				info = build_info(type: VERSE_TYPE_CHAPTER_TITLE, text: node.inner_html)
+				# info = build_info(type: VERSE_TYPE_CHAPTER_TITLE, text: node.inner_html)
+				info = parse_verse(node, VERSE_TYPE_CHAPTER_TITLE)
 				all_infos.push info
 
 			elsif ["subtitle", "intro", "studyIntro", "closing"].include?(node["class"])
