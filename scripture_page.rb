@@ -191,6 +191,7 @@ class ScripturePage < ParseBase
 				p_node = check_and_get_child(verse_node)
 				raise "Unknown node '#{p_node.to_html}' found" unless p_node.name == 'p'
 				info = parse_verse(p_node, 'summary')
+				verse_infos.push(info) unless info.nil?
 			else
 				raise "Unknown node '#{verse_node.to_html}' found"
 			end
