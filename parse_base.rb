@@ -72,7 +72,7 @@ class ParseBase
 
 	def remove_spaces(verse_node)
 		verse_node.children.each do |node|
-			if node.name == 'text' && node.to_html =~ /\A\s+\z/
+			if node.name == 'text' && node.to_html =~ /\A[ ]+\z/
 				node.remove
 				# @log.debug("del space node: '#{node.to_html}'")
 			end

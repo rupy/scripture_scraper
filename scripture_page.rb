@@ -51,7 +51,9 @@ class ScripturePage < ParseBase
 
 	def parse_verses(node, type='verses')
 		verse_infos = []
-		node.children.each do |verse_node|
+		node.children.each_with_index do |verse_node|
+
+			# puts verse_node.to_html
 			next if empty_text_node? verse_node
 
 			if verse_node.name == "p"
@@ -77,11 +79,26 @@ class ScripturePage < ParseBase
 						info = parse_verse(verse_node2, type)
 						verse_infos.push(info) unless info.nil?
 
+					elsif @title == 'd_c' && @book == 'introduction' && type == 'article' && verse_node.children[0]['name'] == 'p14'
+
+						puts @title
+
+						puts '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+
+						element_to_be_inserted = '<p>『教義(きょうぎ)と聖約(せいやく)』のその後(ご)の版(はん)には、さらに別(べつ)の啓示(けいじ)やそのほかの記録(きろく)事項(じこう)が、与(あた)えられたままに、また教会(きょうかい)の所管(しょかん)の会議(かいぎ)や大会(たいかい)で受(う)け入(い)れられたままに追加(ついか)されてきた。</p>'
+						p_node = Nokogiri::XML::DocumentFragment.new(verse_node.document, element_to_be_inserted)
+						verse_node.add_previous_sibling p_node
+						puts verse_node.previous_sibling.to_html
+						info = parse_verse(verse_node.previous_sibling, type, true) # p要素
+						verse_infos.push(info) unless info.nil?
+
+						@log.debug(type)
+						info = parse_verse(verse_node, type) # p要素
+						verse_infos.push(info) unless info.nil?
 					else
 						# TODO: ここに来る要素って何？要確認。
 						@log.debug(type)
 						info = parse_verse(verse_node, type) # p要素
-
 						verse_infos.push(info) unless info.nil?
 					end
 				end

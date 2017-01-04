@@ -81,7 +81,7 @@ module VerseProcessor
 		end
 	end
 
-	def parse_verse(verse_node, type='verse')
+	def parse_verse(verse_node, type='verse', ruby_by_text=false)
 
 		# puts verse_node.content
 		# 先頭のAタグの削除
@@ -145,13 +145,18 @@ module VerseProcessor
 			text = img_info
 		end
 
+		if ruby_by_text
+			rpbt = RubyProcessorByText.new
+			text = rpbt.ruby_process(text)
+		end
+
 		if @title == 'bom' && @lang == 'jpn' && @book == 'bofm-title' && verse_name == 'p3'
 			rpbt = RubyProcessorByText.new
 			text = rpbt.ruby_process(text)
 			text.gsub!(/\s/, "\n")
 		end
 
-		puts text
+		# puts text
 
 		# @log.debug(text.each_codepoint.map{|n| n.to_s(16) })
 

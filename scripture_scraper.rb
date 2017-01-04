@@ -29,6 +29,8 @@ class ScriptureScraper
 		# titleに対して
 		TITLES.each_with_index do |title, title_id|
 
+			# title_id += 1
+
 			all_infos_in_book = []
 
 			if @web_fetcher.undownloadable? lang, title
@@ -46,12 +48,16 @@ class ScriptureScraper
 					puts '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 					next
 				end
+				# next if page_id < 78
 
 				scripture_page = ScripturePage.new lang, title, book_name
 				doc = Nokogiri::HTML.parse(web_data){ |config| config.noblanks }
 				infos = scripture_page.parse_contents doc
 				# all_infos_in_book.push infos
 				all_infos_in_book.push({title: title, book: book_name, chapter: chapter_name, infos: infos})
+
+				# exit(0)
+
 
 				if title == 'bom' && book_name == 'introduction' && lang =='jpn'
 

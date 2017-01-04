@@ -10,6 +10,8 @@ class RubyProcessorByText
 
 	def ruby_process(text)
 
+		@log.debug('processing ruby by text')
+
 		kanji_regrex_str = '[^一二三四五六七八九十百千万億兆〇\p{Hiragana}\p{Katakana}\w、。「」（）\-・……『』ー ]'
 		ruby_regrex = /(#{kanji_regrex_str}+)\((\p{Hiragana}+)\)/
 
